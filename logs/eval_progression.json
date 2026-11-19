@@ -1,0 +1,32 @@
+[
+  {
+    "step": 500,
+    "loss": 2.4416,
+    "file": "vlm_step_500.pt"
+  },
+  {
+    "step": 1000,
+    "loss": 1.6108,
+    "file": "vlm_step_1000.pt"
+  },
+  {
+    "step": 1500,
+    "loss": 0.9971,
+    "file": "vlm_step_1500.pt"
+  },
+  {
+    "step": 2000,
+    "loss": 0.74,
+    "file": "vlm_step_2000.pt"
+  },
+  {
+    "step": 2500,
+    "loss": 0.5909,
+    "file": "vlm_step_2500.pt"
+  },
+  {
+    "step": 3000,
+    "loss": 0.5382,
+    "file": "vlm_step_3000.pt"
+  }
+]
