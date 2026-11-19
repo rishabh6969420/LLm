@@ -58,11 +58,31 @@ Designed specifically for training on high-performance accelerators like the **N
 
 ### Key Technical Innovations
 1. **Discrete Coordinate Tokenization**: Special tokens `<loc_0>` through `<loc_999>` represent continuous bounding box coordinates $[y_{min}, x_{min}, y_{max}, x_{max}]$ normalized to $1000 \times 1000$ coordinate grids.
-2. **Color Attribute Grounding**: Jointly learns visual spectral features alongside object geometry, enabling natural queries like:
-   - `<detect_all>`: Detects all objects, coordinates, and dominant colors.
-   - `<detect_color> red`: Finds and localizes specifically red objects.
-   - `<color_at> <loc_y1><loc_x1><loc_y2><loc_x2>`: Identifies exact color name and Hex value for a target bounding box.
+2. **Fine-Grained Color Shade Grounding (CIELAB & $\Delta E$)**: Uses perceptual color science in $L^*a^*b^*$ space instead of naive RGB distance. Accurately distinguishes nuanced shades:
+   - **Reds**: *blood red* (`#8a0303`), *wine red* (`#722f37`), *burgundy* (`#800020`), *crimson* (`#dc143c`), *scarlet*, *ruby*.
+   - **Blues**: *turquoise* (`#40e0d0`), *sky blue*, *navy blue*, *cobalt blue*, *royal blue*, *cerulean*, *cyan*, *teal*.
+   - **Greens**: *emerald green*, *forest green*, *olive green*, *mint green*, *sage green*, *lime green*.
+   - **Yellows & Oranges**: *mustard yellow*, *amber*, *canary yellow*, *tangerine*, *coral*, *peach*, *terracotta*, *rust*.
+   - **Purples & Pinks**: *lavender*, *violet*, *plum*, *magenta*, *lilac*, *mauve*, *hot pink*, *blush pink*.
 3. **Hardware-Optimized (BF16 & FlashAttention)**: Utilizes `torch.amp.autocast` in Bfloat16, Grouped Query Attention (GQA), and gradient accumulation to saturate Tensor Cores on NVIDIA DGX.
+
+---
+
+## 🌐 Dataset Sources
+
+Strikler acquires its training, validation, and testing data from a combination of real-world vision-language benchmarks and scientific color-grounding streams:
+
+1. **RefCOCO / RefCOCO+ / RefCOCOg (UNC Chapel Hill / Hugging Face `jxu124/refcoco`)**:
+   - 142,209 referring expressions linking specific bounding boxes on 19,994 real photos to natural descriptions like *"the wine jacket"*, *"the turquoise bowl"*, *"olive shirt"*.
+2. **Visual Genome Attributes (Stanford University / Hugging Face `visual_genome`)**:
+   - 108,077 natural images with 3.8 million object instances and 2.8 million fine-grained attribute annotations (color, material, shade modifiers).
+3. **ChromaGround-Shades (CIELAB Calibrated Engine)**:
+   - High-throughput procedural generator streaming calibrated geometric and real-world bounding boxes with exact known chromaticity ($L^*a^*b^*$, sRGB, Hex) for sub-pixel boundary and shade convergence.
+
+To inspect or download dataset streams:
+```bash
+python -m data.download_dataset --dataset all
+```
 
 ---
 

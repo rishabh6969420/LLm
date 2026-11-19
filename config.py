@@ -59,13 +59,20 @@ class TrainingConfig:
 
 @dataclass
 class ColorPaletteConfig:
-    common_colors: List[str] = field(default_factory=lambda: [
-        "red", "crimson", "maroon", "pink", "rose",
-        "orange", "coral", "amber", "gold", "yellow",
-        "lime", "green", "emerald", "olive", "forest green",
-        "cyan", "teal", "turquoise", "sky blue", "blue", "navy",
-        "purple", "violet", "indigo", "magenta",
-        "brown", "beige", "tan", "khaki",
-        "white", "gray", "silver", "charcoal", "black"
+    color_shades: List[str] = field(default_factory=lambda: [
+        # Red shades
+        "blood red", "wine red", "burgundy", "crimson", "ruby red", "scarlet", "carmine", "maroon", "cherry red",
+        # Blue shades
+        "turquoise", "cyan", "teal", "sky blue", "baby blue", "cerulean", "cobalt blue", "royal blue", "sapphire blue", "navy blue", "midnight blue",
+        # Green shades
+        "emerald green", "forest green", "olive green", "mint green", "sage green", "lime green", "jade green", "seafoam green",
+        # Yellow & Orange shades
+        "mustard yellow", "amber", "canary yellow", "lemon yellow", "gold", "tangerine", "coral", "peach", "rust", "terracotta",
+        # Purple & Pink shades
+        "lavender", "violet", "plum", "magenta", "lilac", "mauve", "fuchsia", "hot pink", "blush pink",
+        # Browns & Neutrals
+        "chocolate brown", "espresso", "caramel", "tan", "beige", "khaki",
+        # Monochromes
+        "charcoal", "slate gray", "ash gray", "silver", "pearl white", "jet black"
     ])
 
