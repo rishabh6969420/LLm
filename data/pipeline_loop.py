@@ -164,9 +164,9 @@ class PretrainingPipelineController:
 def main():
     parser = argparse.ArgumentParser(description="End-to-End Strikler Data Pipeline & Training Loop")
     parser.add_argument("--samples", type=int, default=1500000, help="Target clean sample pool size")
-    parser.add_argument("--model_size", type=str, default="3B", choices=["100M", "300M", "1B", "3B"], help="Model size to train")
+    parser.add_argument("--model_size", type=str, default="1B", choices=["100M", "300M", "1B", "3B"], help="Model size to train")
     parser.add_argument("--steps", type=int, default=100000, help="Total training steps")
-    parser.add_argument("--batch_size", type=int, default=16, help="Batch size per step")
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size per step")
     parser.add_argument("--lr", type=float, default=2e-4, help="Learning rate")
     parser.add_argument("--no_train", action="store_true", help="Prepare & verify data without starting training")
     args = parser.parse_args()
