@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyTorch / Models / Weights
+*.pt
+*.pth
+*.bin
+*.onnx
+*.safetensors
+checkpoints/
+models/
+weights/
+
+# Data & Vector stores
+data/raw/
+chroma_db/
+faiss_index/
+*.sqlite3
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Environments & IDEs
+.env
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
