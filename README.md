@@ -6,6 +6,28 @@ Designed specifically for training on high-performance accelerators like the **N
 
 ---
 
+## 🏗️ Staged Model Scaling: From 100M to 3 Billion Parameters
+
+Strikler is designed for **modular, staged training**: you can train compact slices for rapid experimentation and step up to the full **3 Billion Parameter flagship model**:
+
+| Model Scale | Vision ViT | LLM Backbone | Total Parameters | Primary Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| **Strikler-100M** | 10 layers, 384d | 14 layers, 640d (SwiGLU 1792d) | **102.19 Million** | **Active Staged Training** (Fast, efficient, rapid iteration) |
+| **Strikler-300M** | 12 layers, 768d | 16 layers, 1024d (SwiGLU 2816d) | **303.56 Million** | Mid-scale baseline |
+| **Strikler-1B** | 16 layers, 768d | 24 layers, 1792d (SwiGLU 4864d) | **1.12 Billion** | Medium foundation grounding scale |
+| **Strikler-3B** | 24 layers, 1024d | 32 layers, 2816d (SwiGLU 8192d) | **3.05 Billion** | **Flagship Multi-Day DGX Run** (~48 hours on GB10) |
+
+To train a specific stage:
+```bash
+# Train the 100M model piece
+python train.py --model_size 100M --steps 2000 --batch_size 32
+
+# Step up to the full 3B model
+python train.py --model_size 3B --mode dgx_2day --batch_size 16
+```
+
+---
+
 ## 🏛️ Model Architecture
 
 ```
