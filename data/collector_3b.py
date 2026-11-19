@@ -56,10 +56,13 @@ class Strikler3BDataCollector:
         print(f"[*] Connecting to {dataset_name} stream on Hugging Face...")
         try:
             ds = load_dataset(dataset_name, split=split, streaming=True)
+            iterator = iter(ds)
             collected = 0
-            for item in ds:
-                collected += 1
-                if collected >= limit:
+            for _ in range(limit):
+                try:
+                    item = next(iterator)
+                    collected += 1
+                except StopIteration:
                     break
             print(f"  [✓] Verified {collected} records accessible from {dataset_name}")
             return True
@@ -83,3 +86,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    os._exit(0)
+
