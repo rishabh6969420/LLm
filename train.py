@@ -1,5 +1,5 @@
 """
-Main Training Entrypoint for ChromaDetect-VLM.
+Main Training Entrypoint for Strikler.
 Partitions data into:
   • 75% Training
   • 15% Validation
@@ -14,14 +14,14 @@ import argparse
 import torch
 
 from config import VisionConfig, ProjectorConfig, LLMConfig, TrainingConfig
-from model.vision_llm import ChromaDetectVLM
+from model.vision_llm import StriklerVLM
 from data.tokenizer_utils import VLMTokenizer
 from data.dataset import get_dataloaders
 from engine.trainer import VLMTrainer
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Train ChromaDetect-VLM for Object & Color Detection")
+    parser = argparse.ArgumentParser(description="Train Strikler for Object & Color Detection")
     parser.add_argument(
         "--mode",
         type=str,
@@ -40,7 +40,7 @@ def main():
     args = parse_args()
 
     print("=" * 65)
-    print("🚀 ChromaDetect-VLM: Object Detection & Color Grounding Model")
+    print("🚀 Strikler: Multimodal Object Detection & Color Grounding Model")
     print("=" * 65)
 
     # Initialize Tokenizer
@@ -87,8 +87,8 @@ def main():
         eval_every_steps=500 if total_steps >= 5000 else 25,
     )
 
-    print(f"[*] Instantiating VLM Model on device: {'cuda' if torch.cuda.is_available() else 'cpu'}...")
-    model = ChromaDetectVLM(vision_cfg, projector_cfg, llm_cfg)
+    print(f"[*] Instantiating Strikler Model on device: {'cuda' if torch.cuda.is_available() else 'cpu'}...")
+    model = StriklerVLM(vision_cfg, projector_cfg, llm_cfg)
 
     # Total parameters count
     total_params = sum(p.numel() for p in model.parameters())

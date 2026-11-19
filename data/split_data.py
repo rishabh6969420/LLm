@@ -51,3 +51,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     verify_splits(total_samples=args.total, batch_size=args.batch_size)
+

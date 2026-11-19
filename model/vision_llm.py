@@ -1,5 +1,5 @@
 """
-ChromaDetect-VLM: Unified Multimodal Vision-Language Model
+Strikler: Unified Multimodal Vision-Language Model
 for Object Detection and Color Grounding.
 """
 
@@ -14,9 +14,9 @@ from model.projector import MultimodalProjector
 from model.llm_backbone import LLMBackbone
 
 
-class ChromaDetectVLM(nn.Module):
+class StriklerVLM(nn.Module):
     """
-    End-to-End Multimodal Vision-Language Model.
+    Strikler End-to-End Multimodal Vision-Language Model.
     Architecture:
       Image -> ViT Encoder -> Projector -> Visual Tokens
       Prompt -> Token Embeddings --------> Text Tokens
@@ -125,4 +125,5 @@ class ChromaDetectVLM(nn.Module):
         if len(generated_ids) > 0:
             return torch.cat(generated_ids, dim=1)
         return torch.empty((images.size(0), 0), dtype=torch.long, device=images.device)
+
 

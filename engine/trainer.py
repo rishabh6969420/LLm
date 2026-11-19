@@ -1,5 +1,5 @@
 """
-High-Performance Trainer for ChromaDetect-VLM on NVIDIA GPUs / DGX.
+High-Performance Trainer for Strikler on NVIDIA GPUs / DGX.
 Supports BF16 mixed-precision, gradient accumulation, cosine LR scheduling,
 periodic validation loss evaluation, and automatic checkpointing.
 """
@@ -14,7 +14,7 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 
 from config import TrainingConfig
-from model.vision_llm import ChromaDetectVLM
+from model.vision_llm import StriklerVLM
 from data.tokenizer_utils import VLMTokenizer
 
 
@@ -23,7 +23,7 @@ class VLMTrainer:
 
     def __init__(
         self,
-        model: ChromaDetectVLM,
+        model: StriklerVLM,
         train_dataloader: DataLoader,
         val_dataloader: Optional[DataLoader] = None,
         test_dataloader: Optional[DataLoader] = None,
@@ -105,7 +105,7 @@ class VLMTrainer:
         start_time = time.time()
         data_iter = iter(self.train_dataloader)
 
-        print(f"[*] Starting ChromaDetect-VLM Training on {self.device}")
+        print(f"[*] Starting Strikler Training on {self.device}")
         print(f"[*] Total Steps: {total_steps} | BF16: {self.use_bf16} | Batch Size: {self.config.batch_size}")
 
         try:

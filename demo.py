@@ -1,5 +1,5 @@
 """
-Quick End-to-End Demo for ChromaDetect-VLM.
+Quick End-to-End Demo for Strikler.
 Generates a sample test image with colored objects, tests parsing & visualizer,
 and saves the annotated output with color palette.
 Usage:
@@ -14,7 +14,7 @@ from data.tokenizer_utils import VLMTokenizer
 
 def run_demo():
     print("=" * 60)
-    print("🎨 ChromaDetect-VLM: Image & Color Detection Demo")
+    print("🎨 Strikler: Image & Color Detection Demo")
     print("=" * 60)
 
     # 1. Generate test image with known objects

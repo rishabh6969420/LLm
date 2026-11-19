@@ -1,6 +1,6 @@
-# 🎨 ChromaDetect-VLM: Multimodal Vision-Language Model for Object Detection & Color Grounding
+# 🎨 Strikler: Multimodal Vision-Language Model for Object Detection & Color Grounding
 
-**ChromaDetect-VLM** is a research-grade Multimodal Vision-Language Model (VLM) engineered from first principles in PyTorch. It bridges computer vision and autoregressive causal language modeling to perform simultaneous **spatial object detection, bounding-box grounding, and fine-grained color analysis**.
+**Strikler** is a research-grade Multimodal Vision-Language Model (VLM) engineered from first principles in PyTorch. It bridges computer vision and autoregressive causal language modeling to perform simultaneous **spatial object detection, bounding-box grounding, and fine-grained color analysis**.
 
 Designed specifically for training on high-performance accelerators like the **NVIDIA DGX Spark (NVIDIA GB10, 121 GB VRAM)**.
 
@@ -135,7 +135,8 @@ python train.py --mode dgx_2day --batch_size 32 --lr 2e-4
 ### Training Telemetry
 During training, live telemetry tracks loss, learning rate, throughput, and VRAM:
 ```text
-[Step   2000/100000] Loss: 1.8421 | LR: 1.95e-04 | Speed: 42.10 step/s | VRAM: 34.20 GB
+[Step   2000/100000] Train Loss: 1.8421 | LR: 1.95e-04 | Speed: 42.10 step/s | VRAM: 34.20 GB
+[📊 EVALUATION @ Step 2000] Validation Split Loss: 1.8105
 [✓] Saved model checkpoint: checkpoints/vlm_step_2000.pt
 ```
 
@@ -173,12 +174,13 @@ python infer.py \
 │   ├── vision_encoder.py     # Vision Transformer (ViT) patch encoder
 │   ├── projector.py          # Multimodal 2-layer MLP projection adapter
 │   ├── llm_backbone.py       # Causal LLM Decoder (RoPE, RMSNorm, SwiGLU, GQA)
-│   └── vision_llm.py         # Unified ChromaDetect-VLM architecture
+│   └── vision_llm.py         # Unified Strikler VLM architecture
 ├── data/
 │   ├── color_utils.py        # Color palette distance matching & Hex utilities
 │   ├── tokenizer_utils.py    # Spatial coordinate tokenization (<loc_0> to <loc_999>)
 │   ├── synthetic_generator.py# Diverse geometric and color dataset generator
-│   └── dataset.py            # High-throughput PyTorch DataLoader
+│   ├── dataset.py            # 75% Train / 15% Val / 10% Test PyTorch DataLoaders
+│   └── split_data.py         # Dataset partition benchmark & verification tool
 └── engine/
     ├── __init__.py
     ├── trainer.py            # Multi-GPU/BF16 training loop & checkpoint manager
@@ -189,7 +191,7 @@ python infer.py \
 
 ## 🔬 Scientific & Educational Value
 
-For students and researchers in AI/ML, this repository demonstrates:
+For students and researchers in AI/ML, **Strikler** demonstrates:
 1. **Multimodal Alignment**: How continuous image representations are mapped into a discrete autoregressive token vocabulary.
 2. **Object Grounding as Language Modeling**: Unifying bounding box detection into next-token prediction without requiring anchor boxes or NMS (Non-Maximum Suppression).
 3. **Spatial Representation**: How discrete location tokens preserve sub-pixel spatial resolution.

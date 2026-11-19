@@ -1,5 +1,5 @@
 """
-Configuration for ChromaDetect-VLM: Multimodal Vision-Language Model
+Configuration for Strikler: Multimodal Vision-Language Model
 for Object Detection and Color Grounding.
 """
 

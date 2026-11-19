@@ -1,5 +1,5 @@
 """
-Inference Script for ChromaDetect-VLM.
+Inference Script for Strikler.
 Detects objects, boundaries, and colors in any target image.
 Usage:
   python infer.py --image path/to/image.jpg --output annotated_result.png
@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image
 
 from config import VisionConfig, ProjectorConfig, LLMConfig
-from model.vision_llm import ChromaDetectVLM
+from model.vision_llm import StriklerVLM
 from data.tokenizer_utils import VLMTokenizer
 from engine.visualize import parse_vlm_detection_output, draw_detections_and_palette
 
@@ -46,7 +46,7 @@ def run_inference(
     projector_cfg = ProjectorConfig()
     llm_cfg = LLMConfig()
 
-    model = ChromaDetectVLM(vision_cfg, projector_cfg, llm_cfg).to(device)
+    model = StriklerVLM(vision_cfg, projector_cfg, llm_cfg).to(device)
 
     if checkpoint_path and os.path.exists(checkpoint_path):
         print(f"[*] Loading checkpoint from {checkpoint_path}...")
@@ -64,7 +64,7 @@ def run_inference(
     full_prompt = f"<bos>{prompt_task}"
     prompt_ids = torch.tensor([tokenizer.encode(full_prompt)], dtype=torch.long, device=device)
 
-    print(f"[*] Running VLM image and color detection on {image_path}...")
+    print(f"[*] Running Strikler image and color detection on {image_path}...")
     with torch.no_grad():
         generated_ids = model.generate(img_tensor, prompt_ids, max_new_tokens=64)
 
@@ -82,7 +82,7 @@ def run_inference(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run ChromaDetect-VLM inference")
+    parser = argparse.ArgumentParser(description="Run Strikler inference")
     parser.add_argument("--image", type=str, required=True, help="Path to input image")
     parser.add_argument("--checkpoint", type=str, default=None, help="Path to trained .pt checkpoint")
     parser.add_argument("--output", type=str, default="annotated_detection.png", help="Path to save output")

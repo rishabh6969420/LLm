@@ -1,7 +1,7 @@
 from model.vision_encoder import VisionEncoder
 from model.projector import MultimodalProjector
 from model.llm_backbone import LLMBackbone
-from model.vision_llm import ChromaDetectVLM
+from model.vision_llm import StriklerVLM
 
-__all__ = ["VisionEncoder", "MultimodalProjector", "LLMBackbone", "ChromaDetectVLM"]
+__all__ = ["VisionEncoder", "MultimodalProjector", "LLMBackbone", "StriklerVLM"]
 
