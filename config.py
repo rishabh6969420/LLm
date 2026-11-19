@@ -68,3 +68,4 @@ class ColorPaletteConfig:
         "brown", "beige", "tan", "khaki",
         "white", "gray", "silver", "charcoal", "black"
     ])
+

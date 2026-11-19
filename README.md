@@ -66,6 +66,27 @@ Designed specifically for training on high-performance accelerators like the **N
 
 ---
 
+## 📊 Dataset Partitioning (75% Train / 15% Val / 10% Test)
+
+The dataset pipeline enforces a strict, reproducible train/validation/test split with zero data leakage:
+* **75% Training Split**: Used by the optimizer to update model weights with BF16 and gradient accumulation.
+* **15% Validation Split**: Evaluated periodically during training to monitor validation loss, generalization, and prevent overfitting.
+* **10% Test Split**: Held-out unseen benchmark evaluated at the conclusion of training to determine true generalization error.
+
+### Verify Split Distribution:
+```bash
+python -m data.split_data --total 100000 --batch_size 32
+```
+Expected output:
+```text
+Total Dataset Pool: 100,000 samples
+  • Training Split (75%)   : 75,000 samples (75.0%) | 2,343 batches
+  • Validation Split (15%) : 15,000 samples (15.0%) | 468 batches
+  • Testing Split (10%)    : 10,000 samples (10.0%) | 312 batches
+```
+
+---
+
 ## 🚀 Quickstart
 
 ### 1. Installation & Environment

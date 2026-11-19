@@ -27,3 +27,4 @@ class MultimodalProjector(nn.Module):
         x = self.linear2(x)
         # Returns: (Batch, N_patches, LLM_Dim)
         return x
+

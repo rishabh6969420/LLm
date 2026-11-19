@@ -86,3 +86,4 @@ def generate_synthetic_sample(
         "image": img,
         "annotations": annotations,
     }
+

@@ -1,13 +1,13 @@
 """
 High-Performance Trainer for ChromaDetect-VLM on NVIDIA GPUs / DGX.
 Supports BF16 mixed-precision, gradient accumulation, cosine LR scheduling,
-and automatic checkpointing.
+periodic validation loss evaluation, and automatic checkpointing.
 """
 
 import os
 import time
 import math
-from typing import Optional
+from typing import Optional, Dict, Any
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
@@ -26,6 +26,7 @@ class VLMTrainer:
         model: ChromaDetectVLM,
         train_dataloader: DataLoader,
         val_dataloader: Optional[DataLoader] = None,
+        test_dataloader: Optional[DataLoader] = None,
         config: TrainingConfig = None,
         tokenizer: Optional[VLMTokenizer] = None,
     ):
@@ -34,6 +35,7 @@ class VLMTrainer:
         self.model = model.to(self.device)
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
+        self.test_dataloader = test_dataloader
         self.tokenizer = tokenizer or VLMTokenizer()
 
         os.makedirs(self.config.checkpoint_dir, exist_ok=True)
@@ -68,6 +70,31 @@ class VLMTrainer:
         progress = min(max(progress, 0.0), 1.0)
         cosine = 0.5 * (1.0 + math.cos(math.pi * progress))
         return self.config.min_learning_rate + (self.config.learning_rate - self.config.min_learning_rate) * cosine
+
+    @torch.no_grad()
+    def evaluate(self, dataloader: DataLoader, max_eval_batches: int = 50) -> float:
+        """Evaluate loss on validation or test split."""
+        self.model.eval()
+        total_loss = 0.0
+        count = 0
+
+        amp_dtype = torch.bfloat16 if self.use_bf16 else torch.float16
+        for i, batch in enumerate(dataloader):
+            if i >= max_eval_batches:
+                break
+            images = batch["image"].to(self.device, non_blocking=True)
+            input_ids = batch["input_ids"].to(self.device, non_blocking=True)
+            labels = batch["labels"].to(self.device, non_blocking=True)
+
+            with torch.amp.autocast("cuda", enabled=torch.cuda.is_available(), dtype=amp_dtype):
+                outputs = self.model(images=images, input_ids=input_ids, labels=labels)
+                loss = outputs["loss"]
+
+            total_loss += loss.item()
+            count += 1
+
+        self.model.train()
+        return total_loss / max(1, count)
 
     def train(self, max_steps: Optional[int] = None):
         """Main training loop."""
@@ -110,10 +137,9 @@ class VLMTrainer:
 
                     accum_loss += loss.item()
 
-                # Gradient Clipping
+                # Gradient Clipping & Optimizer Step
                 if self.use_bf16:
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.max_grad_norm)
-                    # Update LR
                     lr = self.get_lr(step)
                     for param_group in self.optimizer.param_groups:
                         param_group["lr"] = lr
@@ -138,10 +164,15 @@ class VLMTrainer:
                     vram_gb = torch.cuda.max_memory_allocated() / (1024 ** 3) if torch.cuda.is_available() else 0.0
                     print(
                         f"[Step {step:6d}/{total_steps}] "
-                        f"Loss: {avg_loss:.4f} | LR: {lr:.2e} | "
+                        f"Train Loss: {avg_loss:.4f} | LR: {lr:.2e} | "
                         f"Speed: {steps_per_sec:.2f} step/s | VRAM: {vram_gb:.2f} GB"
                     )
                     running_loss = 0.0
+
+                # Periodic Validation on 15% Validation Split
+                if self.val_dataloader and (step % self.config.eval_every_steps == 0 or step == total_steps):
+                    val_loss = self.evaluate(self.val_dataloader)
+                    print(f"\n[📊 EVALUATION @ Step {step}] Validation Split Loss: {val_loss:.4f}\n")
 
                 # Periodic Checkpoint Saving
                 if step % self.config.save_every_steps == 0 or step == total_steps:
@@ -151,7 +182,12 @@ class VLMTrainer:
             print("\n[!] Training paused by user. Saving emergency checkpoint...")
             self.save_checkpoint(step, tag="interrupted")
 
-        print(f"[✓] Training phase completed! Checkpoints saved to {self.config.checkpoint_dir}")
+        # Final evaluation on 10% Testing Split
+        if self.test_dataloader:
+            test_loss = self.evaluate(self.test_dataloader, max_eval_batches=100)
+            print(f"\n[🎯 FINAL TEST EVALUATION] 10% Test Split Loss: {test_loss:.4f}")
+
+        print(f"[✓] Training completed! Checkpoints saved to {self.config.checkpoint_dir}")
 
     def save_checkpoint(self, step: int, tag: Optional[str] = None):
         """Save model weights and optimizer state."""

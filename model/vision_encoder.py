@@ -132,3 +132,4 @@ class VisionEncoder(nn.Module):
         # Return all patch tokens (excluding [CLS] token, or including)
         # Patch tokens represent localized spatial regions essential for detection & color
         return x[:, 1:, :]
+

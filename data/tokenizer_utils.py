@@ -105,3 +105,4 @@ class VLMTokenizer:
         """Convert a normalized coordinate [0, 999] to token string."""
         coord = max(0, min(self.num_loc_tokens - 1, int(coord)))
         return f"<loc_{coord}>"
+

@@ -125,3 +125,4 @@ class ChromaDetectVLM(nn.Module):
         if len(generated_ids) > 0:
             return torch.cat(generated_ids, dim=1)
         return torch.empty((images.size(0), 0), dtype=torch.long, device=images.device)
+

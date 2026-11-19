@@ -122,3 +122,4 @@ def draw_detections_and_palette(
 
     canvas.save(output_path)
     return canvas
+

@@ -1,9 +1,13 @@
 """
 Main Training Entrypoint for ChromaDetect-VLM.
+Partitions data into:
+  • 75% Training
+  • 15% Validation
+  • 10% Testing
 Usage:
-  python train.py --mode quick_test    # 100 steps to verify pipeline
+  python train.py --mode quick_test    # 100 steps
   python train.py --mode standard      # 5,000 steps (~1-2 hours)
-  python train.py --mode dgx_2day      # 100,000 steps (~40-48 hours on NVIDIA DGX Spark)
+  python train.py --mode dgx_2day      # 100,000 steps (~40-48 hours on DGX Spark)
 """
 
 import argparse
@@ -12,7 +16,7 @@ import torch
 from config import VisionConfig, ProjectorConfig, LLMConfig, TrainingConfig
 from model.vision_llm import ChromaDetectVLM
 from data.tokenizer_utils import VLMTokenizer
-from data.dataset import get_dataloader
+from data.dataset import get_dataloaders
 from engine.trainer import VLMTrainer
 
 
@@ -28,15 +32,16 @@ def parse_args():
     parser.add_argument("--steps", type=int, default=None, help="Custom step count (overrides mode)")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size per step")
     parser.add_argument("--lr", type=float, default=2e-4, help="Learning rate")
+    parser.add_argument("--total_samples", type=int, default=100000, help="Total sample pool to partition")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
 
-    print("=" * 60)
+    print("=" * 65)
     print("🚀 ChromaDetect-VLM: Object Detection & Color Grounding Model")
-    print("=" * 60)
+    print("=" * 65)
 
     # Initialize Tokenizer
     tokenizer = VLMTokenizer()
@@ -79,6 +84,7 @@ def main():
         learning_rate=args.lr,
         max_steps=total_steps,
         save_every_steps=1000 if total_steps >= 5000 else 50,
+        eval_every_steps=500 if total_steps >= 5000 else 25,
     )
 
     print(f"[*] Instantiating VLM Model on device: {'cuda' if torch.cuda.is_available() else 'cpu'}...")
@@ -89,24 +95,30 @@ def main():
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"[*] Total Model Parameters: {total_params / 1e6:.2f}M | Trainable: {trainable_params / 1e6:.2f}M")
 
-    # Dataloader
-    print("[*] Preparing dataset and dataloaders...")
-    train_loader = get_dataloader(
-        num_samples=max(50000, total_steps * train_cfg.batch_size),
+    # Dataloaders with 75% / 15% / 10% Split
+    print(f"[*] Partitioning dataset pool ({args.total_samples:,} samples) into 75% Train / 15% Val / 10% Test...")
+    train_loader, val_loader, test_loader, stats = get_dataloaders(
+        total_samples=args.total_samples,
         batch_size=train_cfg.batch_size,
         tokenizer=tokenizer,
         num_workers=4 if torch.cuda.is_available() else 0,
     )
 
+    print(f"  • Training Split (75%)   : {stats['train']:,} samples ({stats['train_pct']:.1f}%)")
+    print(f"  • Validation Split (15%) : {stats['val']:,} samples ({stats['val_pct']:.1f}%)")
+    print(f"  • Testing Split (10%)    : {stats['test']:,} samples ({stats['test_pct']:.1f}%)")
+
     # Trainer
     trainer = VLMTrainer(
         model=model,
         train_dataloader=train_loader,
+        val_dataloader=val_loader,
+        test_dataloader=test_loader,
         config=train_cfg,
         tokenizer=tokenizer,
     )
 
-    print(f"[*] Launching training profile: '{args.mode}' for {total_steps} steps...")
+    print(f"\n[*] Launching training profile: '{args.mode}' for {total_steps} steps...")
     trainer.train(max_steps=total_steps)
 
 
