@@ -43,7 +43,13 @@ faiss_index/
 # Jupyter Notebooks
 .ipynb_checkpoints
 
-# Environments & IDEs
+# Generated test outputs
+sample_test_image.png
+demo_annotated_detection.png
+output_detection.png
+annotated_detection.png
+*.png
+!assets/*.png
 .env
 .vscode/
 .idea/
@@ -51,3 +57,4 @@ faiss_index/
 # OS
 .DS_Store
 Thumbs.db
+
