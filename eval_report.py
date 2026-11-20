@@ -70,3 +70,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     generate_report(args.checkpoint)
+

@@ -24,9 +24,9 @@ def parse_args():
     parser.add_argument(
         "--model_size",
         type=str,
-        default="1B",
-        choices=["100M", "300M", "1B", "3B"],
-        help="Model scale preset (default: 1B)",
+        default="500M",
+        choices=["100M", "300M", "500M", "1B", "3B"],
+        help="Model scale preset (default: 500M)",
     )
     parser.add_argument(
         "--mode",

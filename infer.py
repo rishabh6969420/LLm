@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Strikler inference")
     parser.add_argument("--image", type=str, required=True, help="Path to input image")
     parser.add_argument("--checkpoint", type=str, default=None, help="Path to trained .pt checkpoint")
-    parser.add_argument("--model_size", type=str, default="100M", choices=["100M", "300M", "1B", "3B"], help="Model size preset")
+    parser.add_argument("--model_size", type=str, default="500M", choices=["100M", "300M", "500M", "1B", "3B"], help="Model size preset")
     parser.add_argument("--output", type=str, default="annotated_detection.png", help="Path to save output")
     parser.add_argument("--prompt", type=str, default="<detect_all>", help="Task prompt: <detect_all>, <detect_color>, or <color_at>")
     args = parser.parse_args()

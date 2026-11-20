@@ -12,9 +12,10 @@ Strikler is designed for **modular, staged training**: you can train compact sli
 
 | Model Scale | Vision ViT | LLM Backbone | Total Parameters | Primary Use Case |
 | :--- | :--- | :--- | :--- | :--- |
-| **Strikler-100M** | 10 layers, 384d | 14 layers, 640d (SwiGLU 1792d) | **102.19 Million** | **Active Staged Training** (Fast, efficient, rapid iteration) |
+| **Strikler-100M** | 10 layers, 384d | 14 layers, 640d (SwiGLU 1792d) | **102.19 Million** | **Fast Prototyping** (Verified 100% complete) |
 | **Strikler-300M** | 12 layers, 768d | 16 layers, 1024d (SwiGLU 2816d) | **303.56 Million** | Mid-scale baseline |
-| **Strikler-1B** | 16 layers, 768d | 24 layers, 1792d (SwiGLU 4864d) | **1.12 Billion** | Medium foundation grounding scale |
+| **Strikler-500M** | 12 layers, 768d | 20 layers, 1280d (SwiGLU 3840d) | **506.80 Million** | **Ideal High-Efficiency Scale** (~300k–500k samples) |
+| **Strikler-1B** | 16 layers, 768d | 24 layers, 1792d (SwiGLU 4864d) | **984.88 Million** | Medium foundation grounding scale |
 | **Strikler-3B** | 24 layers, 1024d | 32 layers, 2816d (SwiGLU 8192d) | **3.05 Billion** | **Flagship Multi-Day DGX Run** (~48 hours on GB10) |
 
 To train a specific stage:

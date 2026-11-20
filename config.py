@@ -63,6 +63,7 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
     Returns architecture configurations scaled for:
       • 100M (~102M parameters) - Fast, lightweight, staged piece 1
       • 300M (~303M parameters) - Mid-scale baseline
+      • 500M (~506M parameters) - Ideal high-efficiency sweet spot
       • 1B   (~1.1B parameters) - Medium foundation scale
       • 3B   (~3.05B parameters) - Full flagship scale for multi-day DGX runs
     """
@@ -105,6 +106,26 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
             num_heads=16,
             num_kv_heads=4,
             intermediate_dim=2816,
+            max_seq_len=512,
+        )
+    elif size == "500M":
+        v_cfg = VisionConfig(
+            embed_dim=768,
+            depth=12,
+            num_heads=12,
+        )
+        p_cfg = ProjectorConfig(
+            vision_dim=768,
+            llm_dim=1280,
+            hidden_dim=2560,
+        )
+        l_cfg = LLMConfig(
+            vocab_size=32000,
+            hidden_dim=1280,
+            num_layers=20,
+            num_heads=10,
+            num_kv_heads=2,
+            intermediate_dim=3840,
             max_seq_len=512,
         )
     elif size == "1B":
