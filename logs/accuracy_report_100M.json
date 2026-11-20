@@ -1,0 +1,28 @@
+{
+  "model_scale": "Strikler-100M",
+  "total_parameters": 102190976,
+  "checkpoint": "checkpoints/vlm_step_3000.pt",
+  "eval_samples": 200,
+  "loss_metrics": {
+    "val_split_loss": 0.5196,
+    "test_split_loss": 0.5081,
+    "perplexity": 1.68
+  },
+  "grounding_metrics": {
+    "mean_iou_pct": 48.32,
+    "precision_iou50_pct": 78.57,
+    "recall_iou50_pct": 47.83,
+    "f1_score_iou50_pct": 59.46,
+    "precision_iou75_pct": 70.78,
+    "recall_iou75_pct": 43.08
+  },
+  "color_accuracy_metrics": {
+    "exact_shade_accuracy_pct": 26.88,
+    "parent_color_accuracy_pct": 32.61
+  },
+  "task_breakdown_pct": {
+    "detect_all": 100.0,
+    "detect_color": 40.85,
+    "color_at": 15.87
+  }
+}
