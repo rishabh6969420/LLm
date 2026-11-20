@@ -35,7 +35,7 @@ class LLMConfig:
     num_heads: int = 10
     num_kv_heads: int = 2  # Grouped Query Attention (GQA)
     intermediate_dim: int = 1792  # SwiGLU FFN
-    max_seq_len: int = 512
+    max_seq_len: int = 2048
     num_loc_tokens: int = 1000  # For normalized bounding boxes [0, 999]
     dropout: float = 0.0
 
@@ -86,7 +86,7 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
             num_heads=10,
             num_kv_heads=2,
             intermediate_dim=1792,
-            max_seq_len=512,
+            max_seq_len=2048,
         )
     elif size == "300M":
         v_cfg = VisionConfig(
@@ -106,7 +106,7 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
             num_heads=16,
             num_kv_heads=4,
             intermediate_dim=2816,
-            max_seq_len=512,
+            max_seq_len=2048,
         )
     elif size == "500M":
         v_cfg = VisionConfig(
@@ -126,7 +126,7 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
             num_heads=10,
             num_kv_heads=2,
             intermediate_dim=3840,
-            max_seq_len=512,
+            max_seq_len=2048,
         )
     elif size == "1B":
         v_cfg = VisionConfig(
@@ -146,7 +146,7 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
             num_heads=14,
             num_kv_heads=2,
             intermediate_dim=4864,
-            max_seq_len=512,
+            max_seq_len=2048,
         )
     elif size == "3B":
         v_cfg = VisionConfig(
@@ -166,7 +166,7 @@ def get_model_preset(size: str = "100M") -> Tuple[VisionConfig, ProjectorConfig,
             num_heads=22,
             num_kv_heads=4,
             intermediate_dim=8192,
-            max_seq_len=512,
+            max_seq_len=2048,
         )
     else:
         raise ValueError(f"Unknown model preset size '{size}'. Choose from: 100M, 300M, 1B, 3B")

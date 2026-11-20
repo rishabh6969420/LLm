@@ -36,6 +36,11 @@ weights/
 
 # Data & Vector stores
 data/raw/
+data/*.zip
+data/raw_annotations/
+data/raw_images/
+data/user_dataset/images/
+data/user_dataset/annotations.json
 chroma_db/
 faiss_index/
 *.sqlite3

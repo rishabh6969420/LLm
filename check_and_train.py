@@ -63,7 +63,10 @@ class UserCollectedDataset(Dataset):
         prompt = "<bos><detect_all>"
         target_parts = []
         for obj in rec.get("objects", []):
-            y1, x1, y2, x2 = obj["bbox_norm"]
+            coords = obj.get("bbox_norm") or obj.get("bbox")
+            if not coords or len(coords) != 4:
+                continue
+            y1, x1, y2, x2 = coords
             b_str = f"{self.tokenizer.coord_to_token(y1)}{self.tokenizer.coord_to_token(x1)}{self.tokenizer.coord_to_token(y2)}{self.tokenizer.coord_to_token(x2)}"
             target_parts.append(f"{b_str} {obj['shade']} {obj['label']}")
 
@@ -174,7 +177,7 @@ class DatasetAuditor:
             objects = entry.get("objects", [])
             valid_objs = []
             for obj in objects:
-                bbox = obj.get("bbox")
+                bbox = obj.get("bbox") or obj.get("bbox_norm")
                 if not bbox or len(bbox) != 4:
                     self.geometry_errors.append(f"{img_rel}: invalid bbox format {bbox}")
                     continue

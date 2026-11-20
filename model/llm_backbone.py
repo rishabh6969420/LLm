@@ -22,11 +22,11 @@ class RMSNorm(nn.Module):
         return x * torch.rsqrt(variance + self.eps) * self.weight
 
 
-def precompute_rope_freqs(head_dim: int, max_seq_len: int, theta: float = 10000.0) -> torch.Tensor:
+def precompute_rope_freqs(head_dim: int, max_seq_len: int, theta: float = 10000.0, device: torch.device = None) -> torch.Tensor:
     """Precompute complex exponential frequencies for Rotary Position Embeddings (RoPE)."""
-    dim_range = torch.arange(0, head_dim, 2).float()
+    dim_range = torch.arange(0, head_dim, 2, device=device).float()
     freqs = 1.0 / (theta ** (dim_range / head_dim))
-    t = torch.arange(max_seq_len, dtype=torch.float32)
+    t = torch.arange(max_seq_len, dtype=torch.float32, device=device)
     freqs = torch.outer(t, freqs)
     return torch.polar(torch.ones_like(freqs), freqs)  # complex tensor (max_seq_len, head_dim // 2)
 
@@ -131,6 +131,10 @@ class LLMBackbone(nn.Module):
         and returns logits (Batch, Seq_Len, Vocab_Size + Loc_Tokens).
         """
         B, S, D = embeddings.shape
+        if S > self.freqs_cis.shape[0]:
+            head_dim = self.config.hidden_dim // self.config.num_heads
+            new_len = max(S, self.freqs_cis.shape[0] * 2)
+            self.freqs_cis = precompute_rope_freqs(head_dim, new_len, device=embeddings.device)
         freqs_cis = self.freqs_cis[:S].to(embeddings.device)
 
         x = embeddings
