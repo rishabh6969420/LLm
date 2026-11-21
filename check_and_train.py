@@ -230,6 +230,7 @@ def check_and_train_pipeline(
     lr: float = 2e-4,
     steps: int = 50000,
     check_only: bool = False,
+    resume: Optional[str] = None,
 ):
     auditor = DatasetAuditor(data_dir=data_dir, model_size=model_size, min_samples=min_samples)
     is_eligible, report = auditor.audit()
@@ -323,6 +324,7 @@ def check_and_train_pipeline(
         test_dataloader=test_loader,
         config=train_cfg,
         tokenizer=tokenizer,
+        resume_checkpoint=resume,
     )
 
     trainer.train(max_steps=steps)
@@ -337,6 +339,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
     parser.add_argument("--lr", type=float, default=2e-4, help="Learning rate")
     parser.add_argument("--steps", type=int, default=50000, help="Training steps")
+    parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint to resume training from")
     parser.add_argument("--check_only", action="store_true", help="Only check eligibility without training")
     args = parser.parse_args()
 
@@ -348,4 +351,5 @@ if __name__ == "__main__":
         lr=args.lr,
         steps=args.steps,
         check_only=args.check_only,
+        resume=args.resume,
     )

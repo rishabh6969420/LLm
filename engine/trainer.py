@@ -29,6 +29,7 @@ class VLMTrainer:
         test_dataloader: Optional[DataLoader] = None,
         config: TrainingConfig = None,
         tokenizer: Optional[VLMTokenizer] = None,
+        resume_checkpoint: Optional[str] = None,
     ):
         self.config = config or TrainingConfig()
         self.device = torch.device(self.config.device if torch.cuda.is_available() else "cpu")
@@ -61,6 +62,20 @@ class VLMTrainer:
         # Precision context
         self.use_bf16 = self.config.bf16 and torch.cuda.is_bf16_supported()
         self.scaler = torch.amp.GradScaler("cuda", enabled=(not self.use_bf16 and torch.cuda.is_available()))
+
+        # Checkpoint Resumption
+        self.start_step = 0
+        if resume_checkpoint and os.path.exists(resume_checkpoint):
+            print(f"[*] Resuming from checkpoint: {resume_checkpoint}")
+            ckpt = torch.load(resume_checkpoint, map_location=self.device, weights_only=False)
+            self.model.load_state_dict(ckpt["model_state"])
+            if "optimizer_state" in ckpt:
+                try:
+                    self.optimizer.load_state_dict(ckpt["optimizer_state"])
+                except Exception as e:
+                    print(f"[!] Warning: Could not restore optimizer state: {e}")
+            self.start_step = ckpt.get("step", 0)
+            print(f"[✓] Resumed state successfully from Step {self.start_step}!")
 
     def get_lr(self, step: int) -> float:
         """Cosine learning rate schedule with linear warmup."""
@@ -100,7 +115,7 @@ class VLMTrainer:
         """Main training loop."""
         total_steps = max_steps or self.config.max_steps
         self.model.train()
-        step = 0
+        step = self.start_step
         running_loss = 0.0
         start_time = time.time()
         data_iter = iter(self.train_dataloader)
