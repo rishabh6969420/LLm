@@ -117,6 +117,10 @@ class StriklerVLM(nn.Module):
             next_token = torch.multinomial(probs, num_samples=1)
             generated_ids.append(next_token)
 
+            # Stop on EOS token (ID 2)
+            if next_token.item() == 2:
+                break
+
             # Embed next token and append
             next_embed = self.llm.token_embed(next_token)
             current_embeddings = torch.cat([current_embeddings, next_embed], dim=1)

@@ -19,6 +19,10 @@ def parse_vlm_detection_output(text: str, image_size: int = 224) -> List[Dict[st
     into structured detections with accurate shades.
     """
     results = []
+    # Truncate at EOS if present
+    if "<eos>" in text:
+        text = text.split("<eos>")[0]
+
     pattern = r"<loc_(\d+)><loc_(\d+)><loc_(\d+)><loc_(\d+)>\s*([^;]+)"
     matches = re.findall(pattern, text)
 

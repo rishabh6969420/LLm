@@ -64,9 +64,15 @@ def evaluate_model(
         raise FileNotFoundError(f"Checkpoint not found at: {checkpoint_path}")
 
     # 1. Load Model
-    v_cfg, p_cfg, l_cfg = get_model_preset(model_size)
-    model = StriklerVLM(v_cfg, p_cfg, l_cfg).to(device)
     ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    if "config" in ckpt:
+        v_cfg = ckpt["config"]["vision"]
+        p_cfg = ckpt["config"]["projector"]
+        l_cfg = ckpt["config"]["llm"]
+    else:
+        v_cfg, p_cfg, l_cfg = get_model_preset(model_size)
+
+    model = StriklerVLM(v_cfg, p_cfg, l_cfg).to(device)
     model.load_state_dict(ckpt["model_state"])
     model.eval()
 
@@ -276,9 +282,10 @@ def evaluate_model(
     print("=" * 75)
 
     os.makedirs("logs", exist_ok=True)
-    with open("logs/accuracy_report_100M.json", "w") as f:
+    report_file = f"logs/accuracy_report_{model_size}.json"
+    with open(report_file, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"[✓] Full accuracy report saved to: logs/accuracy_report_100M.json")
+    print(f"[✓] Full accuracy report saved to: {report_file}")
 
     return results
 
