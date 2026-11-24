@@ -58,6 +58,8 @@ output_detection.png
 annotated_detection.png
 *.png
 !assets/*.png
+*.log
+scripts/*.log
 .env
 .vscode/
 .idea/
