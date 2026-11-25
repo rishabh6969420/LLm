@@ -6,6 +6,12 @@ Runs automatically once Step 5000 SFT training completes.
 import os
 import sys
 import time
+
+repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if repo_dir not in sys.path:
+    sys.path.insert(0, repo_dir)
+os.chdir(repo_dir)
+
 import torch
 from PIL import Image
 
@@ -108,3 +114,4 @@ The model has transitioned from a rigid single-prompt base auto-encoder into a c
 
 if __name__ == "__main__":
     main()
+
