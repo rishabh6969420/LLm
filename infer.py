@@ -65,16 +65,26 @@ def run_inference(
     img_tensor, resized_img = preprocess_image(image_path, vision_cfg.image_size)
     img_tensor = img_tensor.to(device)
 
-    # Encode prompt
-    full_prompt = f"<bos>{prompt_task}"
+    # Format conversational prompt if not raw special token
+    if prompt_task.startswith("<") and prompt_task.endswith(">"):
+        full_prompt = f"<bos>{prompt_task}"
+    elif prompt_task.startswith("Human:"):
+        full_prompt = f"<bos>{prompt_task}"
+    else:
+        full_prompt = f"<bos>Human: {prompt_task}\nAssistant: "
+
     prompt_ids = torch.tensor([tokenizer.encode(full_prompt)], dtype=torch.long, device=device)
 
     print(f"[*] Running Strikler-{model_size.upper()} image and color detection on {image_path}...")
+    print(f"[*] Prompt: {full_prompt.replace(chr(10), ' ')}")
     with torch.no_grad():
-        generated_ids = model.generate(img_tensor, prompt_ids, max_new_tokens=64)
+        with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+            generated_ids = model.generate(img_tensor, prompt_ids, max_new_tokens=96)
 
     gen_text = tokenizer.decode(generated_ids[0].tolist())
-    print(f"[*] Raw Model Output: {gen_text}")
+    ans_text = gen_text.split(full_prompt)[-1] if full_prompt in gen_text else gen_text
+    print(f"[*] 🤖 Model Response: {ans_text.strip()}")
+    print(f"[*] Raw Generated Sequence: {gen_text}")
 
     # Parse and visualize
     detections = parse_vlm_detection_output(gen_text, image_size=vision_cfg.image_size)
@@ -86,13 +96,20 @@ def run_inference(
     print(f"[✓] Annotated detection output saved to: {output_path}")
 
 
+def get_default_checkpoint():
+    if os.path.exists("checkpoints_sft/vlm_sft_step_5000.pt"):
+        return "checkpoints_sft/vlm_sft_step_5000.pt"
+    if os.path.exists("checkpoints/vlm_step_50000.pt"):
+        return "checkpoints/vlm_step_50000.pt"
+    return None
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Strikler inference")
     parser.add_argument("--image", type=str, required=True, help="Path to input image")
-    parser.add_argument("--checkpoint", type=str, default=None, help="Path to trained .pt checkpoint")
+    parser.add_argument("--checkpoint", type=str, default=get_default_checkpoint(), help="Path to trained .pt checkpoint")
     parser.add_argument("--model_size", type=str, default="500M", choices=["100M", "300M", "500M", "1B", "3B"], help="Model size preset")
     parser.add_argument("--output", type=str, default="annotated_detection.png", help="Path to save output")
-    parser.add_argument("--prompt", type=str, default="<detect_all>", help="Task prompt: <detect_all>, <detect_color>, or <color_at>")
+    parser.add_argument("--prompt", type=str, default="Identify all objects and their colors in this image.", help="Query or task prompt")
     args = parser.parse_args()
 
     run_inference(args.image, args.checkpoint, args.output, args.prompt, args.model_size)

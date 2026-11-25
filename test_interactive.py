@@ -19,10 +19,19 @@ from engine.visualize import parse_vlm_detection_output, draw_detections_and_pal
 
 
 def find_latest_checkpoint(checkpoint_dir: str = "checkpoints") -> str:
+    # 1. Check SFT checkpoints first
+    sft_ckpts = glob.glob("checkpoints_sft/vlm_sft_step_*.pt")
+    if sft_ckpts:
+        def get_sft_step(path):
+            base = os.path.basename(path).replace("vlm_sft_step_", "").replace(".pt", "")
+            return int(base) if base.isdigit() else 0
+        sft_ckpts.sort(key=get_sft_step, reverse=True)
+        return sft_ckpts[0]
+
+    # 2. Fallback to base pretraining checkpoints
     ckpts = glob.glob(os.path.join(checkpoint_dir, "vlm_step_*.pt"))
     if not ckpts:
-        raise FileNotFoundError(f"No checkpoints found in {checkpoint_dir}")
-    # Sort by step number
+        raise FileNotFoundError(f"No checkpoints found in checkpoints_sft/ or {checkpoint_dir}")
     def get_step(path):
         base = os.path.basename(path).replace("vlm_step_", "").replace(".pt", "")
         return int(base) if base.isdigit() else 0
@@ -85,8 +94,8 @@ def main():
                     continue
 
             # Prompt selection
-            prompt_input = input("👉 Enter prompt task [Press Enter for '<detect_all>']: ").strip()
-            task_prompt = prompt_input if prompt_input else "<detect_all>"
+            prompt_input = input("👉 Enter prompt task [Press Enter for 'Identify all objects and their colors in this image.']: ").strip()
+            task_prompt = prompt_input if prompt_input else "Identify all objects and their colors in this image."
 
             # Load and Preprocess
             raw_img = Image.open(img_path).convert("RGB")
@@ -99,16 +108,24 @@ def main():
             img_tensor = ((tensor - mean) / std).unsqueeze(0).to(device)
 
             # Generate
-            full_prompt = f"<bos>{task_prompt}"
+            if task_prompt.startswith("<") and task_prompt.endswith(">"):
+                full_prompt = f"<bos>{task_prompt}"
+            elif task_prompt.startswith("Human:"):
+                full_prompt = f"<bos>{task_prompt}"
+            else:
+                full_prompt = f"<bos>Human: {task_prompt}\nAssistant: "
+
             prompt_ids = torch.tensor([tokenizer.encode(full_prompt)], dtype=torch.long, device=device)
 
             print("\n⏳ Model is thinking & generating tokens...")
             with torch.no_grad():
                 with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-                    generated_ids = model.generate(img_tensor, prompt_ids, max_new_tokens=64, temperature=0.7)
+                    generated_ids = model.generate(img_tensor, prompt_ids, max_new_tokens=96, temperature=0.7)
 
             gen_text = tokenizer.decode(generated_ids[0].tolist())
-            print(f"\n[*] 🤖 Raw Generated Output:\n    {gen_text}")
+            ans_text = gen_text.split(full_prompt)[-1] if full_prompt in gen_text else gen_text
+            print(f"\n[*] 🤖 Assistant Response:\n    {ans_text.strip()}")
+            print(f"\n[*] 📝 Full Sequence:\n    {gen_text}")
 
             # Parse and Visualize
             detections = parse_vlm_detection_output(gen_text, image_size=v_cfg.image_size)
